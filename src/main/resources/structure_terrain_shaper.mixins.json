@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "package": "dev.structureterrainshaper.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": ["StructureStartMixin"],
+  "client": [],
+  "injectors": { "defaultRequire": 1 }
+}
+
