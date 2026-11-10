@@ -1,22 +1,41 @@
-name: Build Fabric mod
-on:
-  push:
-  pull_request:
-  workflow_dispatch:
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '25'
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.8.0'
-      - run: gradle build --no-daemon
-      - uses: actions/upload-artifact@v4
-        with:
-          name: structure-terrain-shaper
-          path: build/libs/*.jar
+plugins {
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'maven-publish'
+}
+version = project.mod_version
+group = project.maven_group
+base { archivesName = project.archives_base_name }
+repositories {
+    maven { url = 'https://maven.terraformersmc.com/releases/' }
+    mavenCentral()
+}
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    modClientCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+}
+loom {
+    splitEnvironmentSourceSets()
+    mods {
+        "structure_terrain_shaper" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+}
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') { expand 'version': project.version }
+}
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    withSourcesJar()
+}
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = 'UTF-8'
+}
+
+
+
